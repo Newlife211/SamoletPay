@@ -26,14 +26,14 @@ function seed() {
   };
   const cId = Number(q.run(`INSERT INTO companies (name,inn,kpp,ogrn,address,bank,bik,account,director,balance,plan,notify_emails,webhook_secret)
     VALUES ('ООО «Северный ветер»','7707083893','770701001','1027700132195','г. Москва, ул. Тверская, д. 1','АО «Т-Банк»','044525974','40702810900000012345','Иванова А. С.',0,'business','buh@severveter.ru',?)`, S.token(24)).lastInsertRowid);
-  mk('demo@payout.ru', 'demo1234', 'company', cId, 'Анна Иванова', '+79001234567');
-  mk('buh@payout.ru', 'demo1234', 'company', cId, 'Олег Бухгалтеров', '+79001112233', 'accountant');
-  mk('manager@payout.ru', 'demo1234', 'company', cId, 'Мария Менеджерова', '+79001112244', 'manager');
-  mk('admin@payout.ru', 'admin1234', 'admin', null, 'Оператор платформы', null);
-  const contractorUser = mk('ivan@payout.ru', 'demo1234', 'contractor', null, 'Иван Петров', '+79005556677');
+  mk('demo@samoletpay.ru', 'demo1234', 'company', cId, 'Анна Иванова', '+79001234567');
+  mk('buh@samoletpay.ru', 'demo1234', 'company', cId, 'Олег Бухгалтеров', '+79001112233', 'accountant');
+  mk('manager@samoletpay.ru', 'demo1234', 'company', cId, 'Мария Менеджерова', '+79001112244', 'manager');
+  mk('admin@samoletpay.ru', 'admin1234', 'admin', null, 'Оператор платформы', null);
+  const contractorUser = mk('ivan@samoletpay.ru', 'demo1234', 'contractor', null, 'Иван Петров', '+79005556677');
 
   const people = [
-    ['Иван Петров', 'npd', 'Курьерская доставка', 'ivan@payout.ru', '+79005556677', 123456781],
+    ['Иван Петров', 'npd', 'Курьерская доставка', 'ivan@samoletpay.ru', '+79005556677', 123456781],
     ['Мария Соколова', 'npd', 'Дизайн', 'maria@example.com', '+79005550001', 234567812],
     ['Алексей Кузнецов', 'npd', 'Разработка', 'alex@example.com', '+79005550002', 345678123],
     ['Екатерина Смирнова', 'ip', 'Бухгалтерские услуги', 'kate@example.com', '+79005550003', 456781234],
@@ -100,7 +100,7 @@ function seed() {
     '# ДОГОВОР НА ФОТОСЪЁМКУ № {{номер}}\n\n{{дата}}\n\n{{компания}} (ИНН {{компания.инн}}) и {{фио}} (ИНН {{инн}}) договорились о проведении фотосъёмки: {{предмет}}.\n\n## Стоимость\n\nСтоимость работ — {{сумма}}. Срок сдачи материалов — {{срок}}.\n\n## Права\n\nИсключительные права на фотографии переходят к Заказчику с момента оплаты.');
   L.notify({ company_id: cId, kind: 'risk', text: 'Дмитрий Волков: статус самозанятого не подтверждён ФНС — выплаты приостановлены' });
   L.notify({ company_id: cId, kind: 'risk', text: 'Павел Орлов уволился менее 2 лет назад — выплаты как самозанятому заблокированы' });
-  console.log('Демо-данные: demo@payout.ru / buh@payout.ru / manager@payout.ru / ivan@payout.ru — пароль demo1234; оператор admin@payout.ru / admin1234');
+  console.log('Демо-данные: demo@samoletpay.ru / buh@samoletpay.ru / manager@samoletpay.ru / ivan@samoletpay.ru — пароль demo1234; оператор admin@samoletpay.ru / admin1234');
 }
 function monthName(back) { const d = new Date(); d.setMonth(d.getMonth() - back); return d.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' }); }
 

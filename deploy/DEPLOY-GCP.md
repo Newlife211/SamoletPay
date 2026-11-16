@@ -1,4 +1,4 @@
-# Деплой PayOut на Google Cloud (бесплатно)
+# Деплой SamoletPay на Google Cloud (бесплатно)
 
 Результат: стенд круглосуточно работает по адресу `https://…sslip.io` с HTTPS. Домен покупать не нужно.
 Время: около 20 минут. Всё делается в браузере, SSH-ключи не нужны.
@@ -15,7 +15,7 @@
 
 | Поле | Значение |
 |---|---|
-| Name | `payout` |
+| Name | `samoletpay` |
 | Region | **us-central1 (Iowa)**, **us-east1** или **us-west1** — только эти три бесплатны |
 | Machine type | Series **E2** → **e2-micro** |
 | Boot disk → Change | OS **Ubuntu**, версия **Ubuntu 24.04 LTS (x86/64)**, тип **Standard persistent disk**, размер **30 GB** |
@@ -26,12 +26,13 @@
 ## Шаг 3. Загрузка и установка (~10 мин)
 
 1. В строке машины нажмите кнопку **SSH**: откроется терминал прямо в браузере.
-2. В окне терминала нажмите **⚙ / Upload file** (значок со стрелкой вверх) и выберите `payout.zip`.
-3. Вставьте в терминал и нажмите Enter (`ваш@email.ru` замените своим, он нужен для HTTPS-сертификата):
+2. Вставьте в терминал и нажмите Enter (`ваш@email.ru` замените своим, он нужен для HTTPS-сертификата):
 
 ```bash
-sudo apt-get update && sudo apt-get install -y unzip && unzip -o payout.zip && cd payout && sudo bash deploy/install.sh --domain auto --email ваш@email.ru --password Test2026
+sudo apt-get update && sudo apt-get install -y git && git clone https://github.com/Newlife211/SamoletPay.git && cd SamoletPay && sudo bash deploy/install.sh --domain auto --email ваш@email.ru --password Test2026
 ```
+
+Если репозиторий приватный, git спросит логин GitHub и пароль. Вместо пароля вставьте **Personal Access Token**: GitHub → Settings → Developer settings → Fine-grained tokens, доступ Contents: Read к репозиторию SamoletPay. Другой вариант — скачать архив проекта и загрузить его кнопкой **⚙ / Upload file** в окне терминала.
 
 Скрипт сам:
 - добавит файл подкачки (у бесплатной машины всего 1 ГБ памяти);
@@ -49,10 +50,10 @@ sudo apt-get update && sudo apt-get install -y unzip && unzip -o payout.zip && c
 
 | Роль | Вход (пароль `demo1234`) |
 |---|---|
-| Компания (владелец) | demo@payout.ru |
-| Бухгалтер / менеджер | buh@payout.ru / manager@payout.ru |
-| Исполнитель | ivan@payout.ru |
-| Оператор платформы | admin@payout.ru / `admin1234` |
+| Компания (владелец) | demo@samoletpay.ru |
+| Бухгалтер / менеджер | buh@samoletpay.ru / manager@samoletpay.ru |
+| Исполнитель | ivan@samoletpay.ru |
+| Оператор платформы | admin@samoletpay.ru / `admin1234` |
 
 ## Полезно знать
 
@@ -63,7 +64,7 @@ sudo apt-get update && sudo apt-get install -y unzip && unzip -o payout.zip && c
 Обслуживание (в SSH-терминале):
 
 ```bash
-journalctl -u payout -f                      # логи
-sudo systemctl restart payout                # перезапуск
-sudo bash /opt/payout/deploy/reset-demo.sh   # вернуть исходные демо-данные
+journalctl -u samoletpay -f                      # логи
+sudo systemctl restart samoletpay                # перезапуск
+sudo bash /opt/samoletpay/deploy/reset-demo.sh   # вернуть исходные демо-данные
 ```

@@ -26,7 +26,7 @@ fs.mkdirSync(OUT, { recursive: true });
 
   // демо-компания
   const c = await mk();
-  await c.goto(BASE + '/app#/login'); await c.click('[data-demo="demo@payout.ru"]'); await c.waitForSelector('.chart'); await shot(c, '10-dashboard'); step('вход в демо-кабинет');
+  await c.goto(BASE + '/app#/login'); await c.click('[data-demo="demo@samoletpay.ru"]'); await c.waitForSelector('.chart'); await shot(c, '10-dashboard'); if (/NaN|undefined/.test(await c.textContent('.page'))) errors.push('на дашборде NaN/undefined'); step('вход в демо-кабинет');
   await c.goto(BASE + '/app#/contractors'); await c.waitForSelector('tr[data-id]'); await shot(c, '11-contractors');
   await c.click('tr[data-id]'); await c.waitForSelector('.dl'); await shot(c, '12-contractor-card');
   // добавить исполнителя
@@ -64,7 +64,7 @@ fs.mkdirSync(OUT, { recursive: true });
   await pay.fill('input[placeholder="12/29"]', '12/29'); await pay.fill('input[placeholder="•••"]', '123'); await shot(pay, '30-pay-page'); await pay.click('button'); await pay.waitForSelector('text=Оплата прошла'); step('клиент оплатил сплит');
 
   // исполнитель
-  const k = await mk(); await k.goto(BASE + '/app#/login'); await k.click('[data-demo="ivan@payout.ru"]'); await k.waitForSelector('.kpis'); await shot(k, '40-contractor-home'); step('кабинет исполнителя');
+  const k = await mk(); await k.goto(BASE + '/app#/login'); await k.click('[data-demo="ivan@samoletpay.ru"]'); await k.waitForSelector('.kpis'); await shot(k, '40-contractor-home'); step('кабинет исполнителя');
   await k.goto(BASE + '/app#/market'); await k.waitForSelector('.task-card'); await shot(k, '41-market');
   await k.click('.task-card:has-text("Тестовое задание E2E") [data-r]'); await k.fill('#rf [name=message]', 'Сделаю за день'); await k.click('#rf button.btn-primary'); await k.waitForSelector('text=Вы откликнулись'); step('отклик на задание');
   // компания выбирает исполнителя

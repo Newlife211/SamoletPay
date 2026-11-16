@@ -1,10 +1,10 @@
-# Деплой тестового стенда PayOut на Oracle Cloud
+# Деплой тестового стенда SamoletPay на Oracle Cloud
 
 Схема: **Oracle Cloud** (бесплатный сервер) → **Cloudflare Tunnel** (бесплатно, порты открывать не нужно) → **ваш домен** с HTTPS.
 Время: около 40 минут, почти всё уходит на регистрации.
 
 ```
-Браузер ──HTTPS──▶ Cloudflare ◀──исходящий туннель── сервер Oracle (PayOut на 127.0.0.1:3000)
+Браузер ──HTTPS──▶ Cloudflare ◀──исходящий туннель── сервер Oracle (SamoletPay на 127.0.0.1:3000)
 ```
 
 ---
@@ -15,7 +15,7 @@
    - **Home Region: Germany Central (Frankfurt) или Netherlands Northwest (Amsterdam)** — потом не сменить.
    - Карта нужна только для проверки личности. Российские карты обычно не принимаются.
 2. Откройте ☰ → Compute → Instances → **Create instance**:
-   - **Name:** `payout`;
+   - **Name:** `samoletpay`;
    - **Image:** Change image → **Canonical Ubuntu 24.04**;
    - **Shape:** Change shape → **Ampere → VM.Standard.A1.Flex**, **1 OCPU / 6 GB** (максимум бесплатно — 2 OCPU / 12 GB на все машины);
    - **Networking:** оставьте «Automatically assign public IPv4 address»;
@@ -38,7 +38,7 @@
 **Вариант B — свой домен (.com и т. п.):** Cloudflare → Domain Registration → **Register Domains**. Домен сразу работает на DNS Cloudflare.
 
 **Создание туннеля:**
-1. Cloudflare → **Zero Trust** (бесплатный план, при первом входе попросит выбрать имя команды) → **Networks → Tunnels → Create a tunnel** → **Cloudflared** → имя `payout`.
+1. Cloudflare → **Zero Trust** (бесплатный план, при первом входе попросит выбрать имя команды) → **Networks → Tunnels → Create a tunnel** → **Cloudflared** → имя `samoletpay`.
 2. На экране установки выберите **Debian / arm64**. Скопируйте из команды **токен** — длинную строку после `--token` или `service install`. Саму команду выполнять не нужно, это сделает скрипт.
 3. Далее → вкладка **Public Hostname**:
    - Subdomain: пусто (или `app`), Domain: ваш домен;
@@ -50,7 +50,6 @@
 На своём компьютере (Windows — PowerShell, Mac/Linux — терминал):
 
 ```bash
-scp -i путь/к/ssh-key.key payout.zip ubuntu@IP_СЕРВЕРА:~
 ssh -i путь/к/ssh-key.key ubuntu@IP_СЕРВЕРА
 ```
 
@@ -59,10 +58,12 @@ ssh -i путь/к/ssh-key.key ubuntu@IP_СЕРВЕРА
 На сервере:
 
 ```bash
-sudo apt-get update && sudo apt-get install -y unzip
-unzip payout.zip && cd payout
+sudo apt-get update && sudo apt-get install -y git
+git clone https://github.com/Newlife211/SamoletPay.git && cd SamoletPay
 sudo bash deploy/install.sh --domain ваш-домен.dpdns.org --tunnel ВАШ_ТОКЕН --password Test2026
 ```
+
+Если репозиторий приватный, git спросит логин GitHub и вместо пароля — Personal Access Token: GitHub → Settings → Developer settings → Fine-grained tokens, доступ Contents: Read.
 
 `--password` закрывает стенд паролем от посторонних (логин любой). Уберите этот параметр, если стенд должен быть открытым.
 
@@ -88,34 +89,34 @@ sudo bash deploy/install.sh --domain ваш-домен --email ваш@email.ru  
 
 | Роль | Вход (пароль `demo1234`) | Что смотреть |
 |---|---|---|
-| Компания | demo@payout.ru | Выплаты, документы, биржа, КЭДО, шаблоны, 2FA в разделе «Безопасность» |
-| Бухгалтер / менеджер | buh@payout.ru / manager@payout.ru | Разница в правах |
-| Исполнитель | ivan@payout.ru | Биржа, подпись документов, чеки |
-| Оператор | admin@payout.ru / `admin1234` | Заявки, подтверждение счетов, журнал SMS |
+| Компания | demo@samoletpay.ru | Выплаты, документы, биржа, КЭДО, шаблоны, 2FA в разделе «Безопасность» |
+| Бухгалтер / менеджер | buh@samoletpay.ru / manager@samoletpay.ru | Разница в правах |
+| Исполнитель | ivan@samoletpay.ru | Биржа, подпись документов, чеки |
+| Оператор | admin@samoletpay.ru / `admin1234` | Заявки, подтверждение счетов, журнал SMS |
 
 Стенд работает в демо-режиме: код подписи показывается на экране, оплату счёта можно эмулировать кнопкой, письма и SMS видны оператору в разделе «Письма и SMS». Реальные деньги и SMS не отправляются.
 
 ## Обслуживание
 
 ```bash
-journalctl -u payout -f                      # логи приложения
+journalctl -u samoletpay -f                      # логи приложения
 journalctl -u cloudflared -f                 # логи туннеля
-sudo systemctl restart payout                # перезапуск
-sudo bash deploy/update.sh                   # обновление из папки новой версии (с бэкапом базы)
-sudo bash /opt/payout/deploy/reset-demo.sh   # вернуть исходные демо-данные
-sudo nano /etc/payout.env                    # настройки (после правки — restart)
+sudo systemctl restart samoletpay                # перезапуск
+cd ~/SamoletPay && git pull && sudo bash deploy/update.sh   # обновление из GitHub (с бэкапом базы)
+sudo bash /opt/samoletpay/deploy/reset-demo.sh   # вернуть исходные демо-данные
+sudo nano /etc/samoletpay.env                    # настройки (после правки — restart)
 ```
 
-Файлы на сервере: код в `/opt/payout`, база в `/var/lib/payout/payout.db`, ежедневные копии в `/var/lib/payout/backups`.
+Файлы на сервере: код в `/opt/samoletpay`, база в `/var/lib/samoletpay/samoletpay.db`, ежедневные копии в `/var/lib/samoletpay/backups`.
 
 ## Если что-то не так
 
 | Симптом | Что сделать |
 |---|---|
 | Out of capacity при создании машины | Другой Availability domain, повтор через 1–2 ч или временно E2.1.Micro |
-| Сайт открывается с ошибкой 502 / 1033 | `systemctl status payout cloudflared`. Проверьте, что в Public Hostname указано `http://localhost:3000` |
+| Сайт открывается с ошибкой 502 / 1033 | `systemctl status samoletpay cloudflared`. Проверьте, что в Public Hostname указано `http://localhost:3000` |
 | «туннель не запустился» в конце скрипта | Скопирован неполный токен — создайте новый в Zero Trust и перезапустите скрипт с ним |
 | Домен не открывается | Cloudflare ещё не активировал домен (статус Pending) — подождите |
-| Забыли пароль стенда | `sudo nano /etc/payout.env` → `SITE_PASSWORD=…` → `sudo systemctl restart payout` |
+| Забыли пароль стенда | `sudo nano /etc/samoletpay.env` → `SITE_PASSWORD=…` → `sudo systemctl restart samoletpay` |
 
 Важно: этот стенд предназначен для теста. Для боевого запуска с данными исполнителей из РФ нужен сервер в России (152-ФЗ). Скрипт установки там тот же.

@@ -9,7 +9,7 @@
 const { q } = require('./db');
 
 const APP_URL = (process.env.APP_URL || 'http://localhost:' + (process.env.PORT || 3000)).replace(/\/$/, '');
-const BRAND = process.env.BRAND || 'PayOut';
+const BRAND = process.env.BRAND || 'SamoletPay';
 
 function enqueue(channel, to, subject, body) {
   if (!to) return null;
@@ -36,7 +36,7 @@ async function deliver(id) {
     const r = await fetch('https://go1.unisender.ru/ru/transactional/api/v1/email/send.json', {
       method: 'POST', signal: AbortSignal.timeout(8000),
       headers: { 'Content-Type': 'application/json', 'X-API-KEY': process.env.UNISENDER_API_KEY },
-      body: JSON.stringify({ message: { recipients: [{ email: m.to_addr }], subject: m.subject, from_email: process.env.EMAIL_FROM || 'noreply@payout.example', from_name: BRAND, body: { plaintext: m.body } } }),
+      body: JSON.stringify({ message: { recipients: [{ email: m.to_addr }], subject: m.subject, from_email: process.env.EMAIL_FROM || 'noreply@samoletpay.example', from_name: BRAND, body: { plaintext: m.body } } }),
     });
     resp = (await r.text()).slice(0, 500);
     if (!r.ok) throw new Error('unisender: ' + resp);

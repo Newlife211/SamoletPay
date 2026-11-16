@@ -2,7 +2,7 @@
 const { q, K, R } = require('./db');
 const mailer = require('./mailer');
 
-const BRAND = process.env.BRAND || 'PayOut';
+const BRAND = process.env.BRAND || 'SamoletPay';
 
 const PLANS = {
   start:      { name: 'Старт',      fee: 3.0, monthly: 0,     contractors: 50,   desc: 'Для первых выплат и небольших команд' },

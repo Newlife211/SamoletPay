@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PayOut: тестовый запуск с публичной ссылкой (macOS / Linux). Запуск: bash start-test.sh
+# SamoletPay: тестовый запуск с публичной ссылкой (macOS / Linux). Запуск: bash start-test.sh
 set -e
 cd "$(dirname "$0")"
 
@@ -18,6 +18,6 @@ trap 'kill $APP 2>/dev/null' EXIT
 sleep 2
 echo
 echo "Сейчас появится публичная ссылка https://....trycloudflare.com — пока окно открыто, стенд работает."
-echo "Демо-доступы (пароль demo1234): demo@, buh@, manager@, ivan@payout.ru; оператор admin@payout.ru / admin1234"
+echo "Демо-доступы (пароль demo1234): demo@, buh@, manager@, ivan@samoletpay.ru; оператор admin@samoletpay.ru / admin1234"
 echo
 cloudflared tunnel --url http://localhost:3000

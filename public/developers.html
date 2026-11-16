@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Open API — PayOut</title><link rel="stylesheet" href="/assets/base.css"><link rel="stylesheet" href="/assets/site.css"></head>
+<title>Open API — SamoletPay</title><link rel="stylesheet" href="/assets/base.css"><link rel="stylesheet" href="/assets/site.css"></head>
 <body><header id="site-h"></header><main>
 <section class="hero" style="padding-bottom:20px"><div class="container">
   <span class="eyebrow">Для разработчиков</span>
@@ -10,7 +10,7 @@
 <section style="padding-top:10px"><div class="container prose">
   <h2>Аутентификация</h2>
   <p>Передавайте ключ в заголовке <span class="mono">X-Api-Key</span>.</p>
-  <div class="code">curl https://payout.example/api/v1/balance -H "X-Api-Key: po_live_…"</div>
+  <div class="code">curl https://samoletpay.example/api/v1/balance -H "X-Api-Key: sp_live_…"</div>
 
   <div class="ep"><span class="m">GET</span>/api/v1/balance</div><p>Текущий баланс номинального счёта.</p>
   <div class="ep"><span class="m">GET</span>/api/v1/contractors</div><p>Список исполнителей и статус НПД.</p>
@@ -30,9 +30,9 @@
 
   <h2>Вебхуки</h2>
   <p>Укажите URL в кабинете. Мы отправляем POST с JSON о событиях <span class="mono">payout.paid</span>, <span class="mono">payout.failed</span> и <span class="mono">document.signed</span>. При ошибке — до 6 повторов с нарастающей паузой.</p>
-  <p>Каждый запрос подписан: заголовки <span class="mono">X-PayOut-Timestamp</span> и <span class="mono">X-PayOut-Signature</span>. Проверяйте подпись секретом из кабинета:</p>
+  <p>Каждый запрос подписан: заголовки <span class="mono">X-SamoletPay-Timestamp</span> и <span class="mono">X-SamoletPay-Signature</span>. Проверяйте подпись секретом из кабинета:</p>
   <div class="code">expected = "sha256=" + HMAC_SHA256(secret, timestamp + "." + raw_body).hex()
-<span class="k">if</span> not compare_digest(expected, request.headers["X-PayOut-Signature"]): reject()</div>
+<span class="k">if</span> not compare_digest(expected, request.headers["X-SamoletPay-Signature"]): reject()</div>
   <div class="code">{ "event": "payout.paid", "data": { "id": 381, "amount": 15000, "contractor_id": 42, "receipt": "20a1b2c3d4e5" }, "ts": "2026-11-16T10:00:00Z" }</div>
   <h2>Ошибки</h2>
   <p>Ответ с кодом 4xx содержит поле <span class="mono">error</span> с понятным текстом на русском. Например, 402 означает «Недостаточно средств», 422 — что выплата заблокирована риск-проверкой, 429 — превышен лимит 600 запросов в минуту.</p>

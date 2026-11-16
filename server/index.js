@@ -46,7 +46,7 @@ function siteAuthOk(req, url) {
 const server = http.createServer(async (req, res) => {
   const t0 = Date.now();
   const url = new URL(req.url, 'http://x');
-  if (!siteAuthOk(req, url)) { res.writeHead(401, { 'WWW-Authenticate': 'Basic realm="PayOut test", charset="UTF-8"', 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('Тестовый стенд: требуется пароль'); }
+  if (!siteAuthOk(req, url)) { res.writeHead(401, { 'WWW-Authenticate': 'Basic realm="SamoletPay test", charset="UTF-8"', 'Content-Type': 'text/plain; charset=utf-8' }); return res.end('Тестовый стенд: требуется пароль'); }
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', 'same-origin');
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');

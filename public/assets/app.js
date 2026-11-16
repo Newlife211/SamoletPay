@@ -1,4 +1,4 @@
-/* PayOut — SPA кабинетов компании и исполнителя. Без зависимостей. */
+/* SamoletPay — SPA кабинетов компании и исполнителя. Без зависимостей. */
 'use strict';
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -138,7 +138,7 @@ const emptyBox = (title, text, btn = '') => `<div class="empty"><b>${title}</b>$
    АВТОРИЗАЦИЯ
    ========================================================= */
 function authShell(inner) {
-  $('#app').innerHTML = `<div class="auth"><div class="art"><a class="logo" href="/"><i></i>PayOut</a>
+  $('#app').innerHTML = `<div class="auth"><div class="art"><a class="logo" href="/"><i></i>SamoletPay</a>
     <h2>Договоры, подписи и выплаты исполнителям — в одном окне.</h2>
     <div style="position:relative;z-index:1;color:#9FB0C0;font-size:14px">НПД · ИП · ГПХ · ЕАЭС · Open API</div></div>
     <div class="frm"><div>${inner}</div></div></div>`;
@@ -150,7 +150,7 @@ on('/login', async (_, qy) => {
     <button class="btn btn-primary btn-lg" style="width:100%">Войти</button></form>
     <p class="small" style="margin-top:12px"><a href="#/forgot">Забыли пароль?</a></p>
     <div class="card" style="margin-top:20px;padding:16px"><b class="small">Демо-доступ</b>
-      <div class="row wrap" style="margin-top:8px"><button class="btn btn-ghost btn-sm" data-demo="demo@payout.ru">Компания (владелец)</button><button class="btn btn-ghost btn-sm" data-demo="buh@payout.ru">Бухгалтер</button><button class="btn btn-ghost btn-sm" data-demo="manager@payout.ru">Менеджер</button><button class="btn btn-ghost btn-sm" data-demo="ivan@payout.ru">Исполнитель</button><button class="btn btn-ghost btn-sm" data-demo="admin@payout.ru" data-pass="admin1234">Оператор</button></div></div>`);
+      <div class="row wrap" style="margin-top:8px"><button class="btn btn-ghost btn-sm" data-demo="demo@samoletpay.ru">Компания (владелец)</button><button class="btn btn-ghost btn-sm" data-demo="buh@samoletpay.ru">Бухгалтер</button><button class="btn btn-ghost btn-sm" data-demo="manager@samoletpay.ru">Менеджер</button><button class="btn btn-ghost btn-sm" data-demo="ivan@samoletpay.ru">Исполнитель</button><button class="btn btn-ghost btn-sm" data-demo="admin@samoletpay.ru" data-pass="admin1234">Оператор</button></div></div>`);
   const f = $('#f');
   const done = async () => { ME = await api('/api/me'); location.hash = HOME(); };
   const go = async (email, password) => {
@@ -163,7 +163,7 @@ on('/login', async (_, qy) => {
   };
   f.onsubmit = (e) => { e.preventDefault(); const d = formData(f); go(d.email, d.password).catch(fail); };
   $$('[data-demo]').forEach((b) => b.onclick = () => go(b.dataset.demo, b.dataset.pass || 'demo1234').catch(fail));
-  if (qy.demo) go('demo@payout.ru', 'demo1234').catch(fail);
+  if (qy.demo) go('demo@samoletpay.ru', 'demo1234').catch(fail);
 });
 on('/forgot', async () => {
   authShell(`<h2 style="font-size:30px">Восстановление пароля</h2><p class="muted">Пришлём ссылку для смены пароля на email.</p>
@@ -248,7 +248,7 @@ async function refreshBadges() {
 on('/dashboard', async () => {
   const d = await refreshBadges(); ME = await api('/api/me');
   const s = d.stats, c = d.company;
-  const max = Math.max(1, ...d.monthly.map((x) => x.v));
+  const max = Math.max(1, ...d.monthly.map((x) => x.total));
   const months = d.monthly.map((x) => ({ ...x, label: new Date(x.m + '-01').toLocaleDateString('ru-RU', { month: 'short' }) }));
   layout(`Добрый день${ME.name ? ', ' + esc(ME.name.split(' ')[0]) : ''}`, `
     <div class="kpis">
@@ -259,7 +259,7 @@ on('/dashboard', async () => {
     </div>
     <div class="cols-2">
       <div class="card"><div class="card-h"><h3>Выплаты по месяцам</h3><a href="#/payouts" class="small">Все выплаты →</a></div>
-        ${months.length ? `<div class="chart">${months.map((x) => `<div class="c"><em>${Math.round(x.v / 1000)}k</em><i style="height:${(x.v / max) * 100}%"></i><span>${x.label}</span></div>`).join('')}</div>` : emptyBox('Пока нет выплат', 'Здесь появится динамика')}
+        ${months.length ? `<div class="chart">${months.map((x) => `<div class="c"><em>${Math.round(x.total / 1000)}k</em><i style="height:${(x.total / max) * 100}%"></i><span>${x.label}</span></div>`).join('')}</div>` : emptyBox('Пока нет выплат', 'Здесь появится динамика')}
       </div>
       <div class="card"><h3>Что требует внимания</h3>
         ${s.docsToSign ? `<div class="risk-item warn">📝 <span>${s.docsToSign} документ(ов) ждут вашей подписи. <a href="#/documents?status=mine">Подписать</a></span></div>` : ''}
@@ -675,8 +675,8 @@ on('/integrations', async () => {
       <div class="card"><h3>Вебхуки</h3><p class="small muted">События: payout.paid, payout.failed, document.signed. До 6 повторов при ошибке.</p>
         <form id="wf" class="row"><input class="input" name="url" placeholder="https://your-crm.ru/hooks/payout" value="${esc(d.webhook_url || '')}"><button class="btn btn-primary">Сохранить</button></form>
         <div class="row wrap" style="margin-top:10px"><button class="btn btn-ghost btn-sm" id="test">Тестовое событие</button><button class="btn btn-ghost btn-sm" id="rot">Новый секрет подписи</button><span class="small muted">Секрет: <span class="mono">${esc(d.webhook_secret_hint || '—')}</span></span></div>
-        <details style="margin-top:10px"><summary class="small" style="cursor:pointer">Как проверить подпись</summary><div class="code" style="margin-top:8px;font-size:12px">sig = HMAC_SHA256(secret, X-PayOut-Timestamp + "." + body)
-assert "sha256=" + hex(sig) == X-PayOut-Signature</div></details>
+        <details style="margin-top:10px"><summary class="small" style="cursor:pointer">Как проверить подпись</summary><div class="code" style="margin-top:8px;font-size:12px">sig = HMAC_SHA256(secret, X-SamoletPay-Timestamp + "." + body)
+assert "sha256=" + hex(sig) == X-SamoletPay-Signature</div></details>
         ${d.logs.length ? `<table class="tbl" style="margin-top:12px"><tbody>${d.logs.map((l) => `<tr><td class="small">${fdate(l.created_at, true)}</td><td class="mono small">${esc(l.event)}</td><td class="small">#${l.attempt}</td><td class="small">${esc(l.status)}</td></tr>`).join('')}</tbody></table>` : ''}</div>
       <div class="card"><h3>1С и Excel</h3><p class="muted small">Импорт исполнителей и реестров из CSV, выгрузка проведённых выплат для 1С.</p><div class="row wrap"><a class="btn btn-ghost btn-sm" href="/api/export/1c.csv">Выгрузка для 1С</a><a class="btn btn-ghost btn-sm" href="/api/export/payouts.csv">Все выплаты CSV</a><a class="btn btn-ghost btn-sm" href="/api/export/contractors.csv">Исполнители CSV</a></div></div>
       <div class="card"><h3>Госключ и White Label</h3><p class="muted small">Способ подписи и брендирование кабинета — в <a href="#/settings">Настройках</a>. White Label доступен на тарифе «Корпорация».</p></div>

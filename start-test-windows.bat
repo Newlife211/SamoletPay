@@ -1,11 +1,11 @@
 @echo off
 chcp 65001 >nul
-title PayOut — тестовый запуск
+title SamoletPay — тестовый запуск
 cd /d "%~dp0"
 
 echo.
 echo  ==============================================
-echo    PayOut: запуск тестового стенда с публичной ссылкой
+echo    SamoletPay: запуск тестового стенда с публичной ссылкой
 echo  ==============================================
 echo.
 
@@ -36,8 +36,8 @@ if errorlevel 1 (
   exit /b
 )
 
-echo [3/3] Запускаю PayOut в отдельном окне...
-start "PayOut — сервер (не закрывайте)" cmd /k "set TRUST_PROXY=1&& set NPD_OFFLINE=0&& node --no-warnings server/index.js"
+echo [3/3] Запускаю SamoletPay в отдельном окне...
+start "SamoletPay — сервер (не закрывайте)" cmd /k "set TRUST_PROXY=1&& set NPD_OFFLINE=0&& node --no-warnings server/index.js"
 timeout /t 3 >nul
 
 echo.
@@ -45,8 +45,8 @@ echo  Сейчас появится публичная ссылка вида htt
 echo  Её можно открывать с любого устройства и отправлять коллегам.
 echo  Пока это окно открыто — стенд работает. Закрыли окно — ссылка перестала работать.
 echo.
-echo  Демо-доступы (пароль demo1234): demo@payout.ru, buh@payout.ru, manager@payout.ru, ivan@payout.ru
-echo  Оператор: admin@payout.ru / admin1234
+echo  Демо-доступы (пароль demo1234): demo@samoletpay.ru, buh@samoletpay.ru, manager@samoletpay.ru, ivan@samoletpay.ru
+echo  Оператор: admin@samoletpay.ru / admin1234
 echo.
 cloudflared tunnel --url http://localhost:3000
 pause

@@ -1,6 +1,6 @@
 /* Общий хедер/футер, заявки, проверка НПД для публичных страниц */
 (function () {
-  const BRAND = 'PayOut';
+  const BRAND = 'SamoletPay';
   const path = location.pathname;
   const nav = [['/', 'Бизнесу'], ['/contractors', 'Исполнителям'], ['/tariffs', 'Тарифы'], ['/knowledge', 'База знаний'], ['/developers', 'API']];
   const h = document.getElementById('site-h');
@@ -21,7 +21,7 @@
         <p><a href="tel:+78000000000" style="display:inline;font-weight:700;color:var(--ink)">8 800 000-00-00</a><br><span class="muted">Ежедневно 9:00–21:00 МСК, чат — 24/7</span></p></div>
       <div><h5>Продукт</h5><a href="/#solutions">Решения</a><a href="/tariffs">Тарифы и калькулятор</a><a href="/developers">Open API</a><a href="/app#/register">Регистрация</a></div>
       <div><h5>Исполнителям</h5><a href="/contractors">Как получать выплаты</a><a href="/contractors#check">Проверить статус НПД</a><a href="/app#/register?role=contractor">Кабинет исполнителя</a></div>
-      <div><h5>Компания</h5><a href="/knowledge">База знаний</a><a href="/knowledge#faq">Вопросы и ответы</a><a href="/privacy">Политика конфиденциальности</a><a href="mailto:hello@payout.example">hello@payout.example</a></div>
+      <div><h5>Компания</h5><a href="/knowledge">База знаний</a><a href="/knowledge#faq">Вопросы и ответы</a><a href="/privacy">Политика конфиденциальности</a><a href="mailto:hello@samoletpay.example">hello@samoletpay.example</a></div>
     </div><div class="legal"><span>© ${new Date().getFullYear()} ${BRAND}. Реквизиты оператора публикуются после регистрации юрлица.</span><span>Расчёты через номинальные счета банков-партнёров</span></div></div>`;
   }
 

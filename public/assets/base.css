@@ -1,4 +1,4 @@
-/* PayOut design tokens — общий слой для сайта и кабинета */
+/* SamoletPay design tokens — общий слой для сайта и кабинета */
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
 :root{
   --ink:#0B1B2B; --ink-2:#2A3A4B; --muted:#6B7785; --line:#E4E2DB; --line-2:#EFEDE7;

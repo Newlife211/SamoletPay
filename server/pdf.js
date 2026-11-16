@@ -159,7 +159,7 @@ function build(blocks, { title = 'Документ' } = {}) {
   });
   objs[catalog - 1] = `<< /Type /Catalog /Pages ${pagesObj} 0 R >>`;
   objs[pagesObj - 1] = `<< /Type /Pages /Kids [${pageIds.map((i) => i + ' 0 R').join(' ')}] /Count ${pageIds.length} >>`;
-  const info = add(`<< /Producer (PayOut) /Title <FEFF${Buffer.from(title, 'utf16le').swap16().toString('hex')}> >>`);
+  const info = add(`<< /Producer (SamoletPay) /Title <FEFF${Buffer.from(title, 'utf16le').swap16().toString('hex')}> >>`);
 
   const parts = [Buffer.from('%PDF-1.7\n%\xE2\xE3\xCF\xD3\n', 'latin1')]; const offsets = []; let len = parts[0].length;
   objs.forEach((o, i) => { offsets.push(len); const b = Buffer.concat([Buffer.from(`${i + 1} 0 obj\n`, 'latin1'), Buffer.isBuffer(o) ? o : Buffer.from(o, 'latin1'), Buffer.from('\nendobj\n', 'latin1')]); parts.push(b); len += b.length; });

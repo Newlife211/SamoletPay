@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # =====================================================================
-#  PayOut — установка на VPS (Oracle Cloud / любой Ubuntu 22.04–24.04, ARM или x86)
+#  SamoletPay — установка на VPS (Oracle Cloud / любой Ubuntu 22.04–24.04, ARM или x86)
 #
 #  Режим 1 — Cloudflare Tunnel (рекомендуется для Oracle: порты открывать не нужно)
-#     sudo bash deploy/install.sh --domain payout.dpdns.org --tunnel <ТОКЕН_ТУННЕЛЯ>
+#     sudo bash deploy/install.sh --domain samoletpay.dpdns.org --tunnel <ТОКЕН_ТУННЕЛЯ>
 #
 #  Режим 2 — прямой HTTPS через Caddy (нужно открыть порты 80/443 в облаке)
-#     sudo bash deploy/install.sh --domain payout.dpdns.org --email me@mail.ru
+#     sudo bash deploy/install.sh --domain samoletpay.dpdns.org --email me@mail.ru
 #     sudo bash deploy/install.sh --domain auto --email me@mail.ru     # адрес 1-2-3-4.sslip.io по IP
 #
 #  Дополнительно:
@@ -28,7 +28,7 @@ while [ $# -gt 0 ]; do
   esac
 done
 
-APP_DIR=/opt/payout; DATA_DIR=/var/lib/payout; ENV_FILE=/etc/payout.env
+APP_DIR=/opt/samoletpay; DATA_DIR=/var/lib/samoletpay; ENV_FILE=/etc/samoletpay.env
 SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 say() { printf '\n\033[1;32m==> %s\033[0m\n' "$*"; }
 die() { printf '\n\033[1;31mОшибка: %s\033[0m\n' "$*" >&2; exit 1; }
@@ -67,10 +67,10 @@ node -e "require('node:sqlite')" 2>/dev/null || die "нужен Node.js 22.5+ (�
 echo "Node $(node -v) ($(uname -m))"
 
 say "Пользователь и каталоги"
-id payout >/dev/null 2>&1 || useradd --system --home "$DATA_DIR" --shell /usr/sbin/nologin payout
+id samoletpay >/dev/null 2>&1 || useradd --system --home "$DATA_DIR" --shell /usr/sbin/nologin samoletpay
 mkdir -p "$APP_DIR" "$DATA_DIR/backups"
-tar -C "$SRC_DIR" --exclude='./data' --exclude='./shots' --exclude='./node_modules' -cf - . | tar -C "$APP_DIR" -xf -
-chown -R root:root "$APP_DIR"; chown -R payout:payout "$DATA_DIR"; chmod 750 "$DATA_DIR"
+tar -C "$SRC_DIR" --exclude='./.git' --exclude='./data' --exclude='./shots' --exclude='./node_modules' -cf - . | tar -C "$APP_DIR" -xf -
+chown -R root:root "$APP_DIR"; chown -R samoletpay:samoletpay "$DATA_DIR"; chmod 750 "$DATA_DIR"
 
 say "Конфигурация $ENV_FILE"
 if [ ! -f "$ENV_FILE" ]; then
@@ -78,8 +78,8 @@ if [ ! -f "$ENV_FILE" ]; then
 PORT=3000
 HOST=127.0.0.1
 APP_URL=https://$DOMAIN
-BRAND=PayOut
-DB_PATH=$DATA_DIR/payout.db
+BRAND=SamoletPay
+DB_PATH=$DATA_DIR/samoletpay.db
 BACKUP_DIR=$DATA_DIR/backups
 DEMO_MODE=$([ $PROD -eq 1 ] && echo 0 || echo 1)
 SEED=$([ $PROD -eq 1 ] && echo 0 || echo 1)
@@ -93,22 +93,22 @@ SITE_PASSWORD=$SITE_PASS
 # UNISENDER_API_KEY=
 # EMAIL_FROM=noreply@$DOMAIN
 EOF
-  chmod 640 "$ENV_FILE"; chown root:payout "$ENV_FILE"
+  chmod 640 "$ENV_FILE"; chown root:samoletpay "$ENV_FILE"
 else
   sed -i "s#^APP_URL=.*#APP_URL=https://$DOMAIN#" "$ENV_FILE"
   if grep -q '^SITE_PASSWORD=' "$ENV_FILE"; then sed -i "s#^SITE_PASSWORD=.*#SITE_PASSWORD=$SITE_PASS#" "$ENV_FILE"; else echo "SITE_PASSWORD=$SITE_PASS" >> "$ENV_FILE"; fi
 fi
 
 say "Сервис systemd"
-cat > /etc/systemd/system/payout.service <<EOF
+cat > /etc/systemd/system/samoletpay.service <<EOF
 [Unit]
-Description=PayOut
+Description=SamoletPay
 After=network-online.target
 Wants=network-online.target
 
 [Service]
-User=payout
-Group=payout
+User=samoletpay
+Group=samoletpay
 WorkingDirectory=$APP_DIR
 EnvironmentFile=$ENV_FILE
 ExecStart=/usr/bin/node --no-warnings server/index.js
@@ -125,8 +125,8 @@ MemoryMax=600M
 WantedBy=multi-user.target
 EOF
 systemctl daemon-reload
-systemctl enable payout >/dev/null
-systemctl restart payout
+systemctl enable samoletpay >/dev/null
+systemctl restart samoletpay
 
 if [ "$MODE" = tunnel ]; then
   say "Cloudflare Tunnel"
@@ -183,7 +183,7 @@ dpkg-reconfigure -f noninteractive unattended-upgrades >/dev/null 2>&1 || true
 
 say "Проверка"
 for i in $(seq 1 20); do curl -fsS http://127.0.0.1:3000/healthz >/dev/null 2>&1 && break; sleep 1; done
-curl -fsS http://127.0.0.1:3000/healthz >/dev/null && echo "Приложение: OK" || { journalctl -u payout -n 30 --no-pager; die "приложение не запустилось"; }
+curl -fsS http://127.0.0.1:3000/healthz >/dev/null && echo "Приложение: OK" || { journalctl -u samoletpay -n 30 --no-pager; die "приложение не запустилось"; }
 [ "$MODE" = tunnel ] && { sleep 3; systemctl is-active --quiet cloudflared && echo "Туннель: OK" || { journalctl -u cloudflared -n 20 --no-pager; die "туннель не запустился — проверьте токен"; }; }
 
 cat <<EOF
@@ -193,11 +193,11 @@ cat <<EOF
 $( [ "$MODE" = tunnel ] && echo "  В Cloudflare у туннеля должен быть Public hostname: $DOMAIN → http://localhost:3000" )
 $( [ "$MODE" = caddy ] && echo "  Откройте порты 80 и 443 в Security List Oracle — сертификат выпустится за минуту" )
 $( [ -n "$SITE_PASS" ] && echo "  Вход на стенд: логин любой (например tester), пароль $SITE_PASS" )
-$( [ $PROD -eq 0 ] && printf '%s\n' "  Демо-доступы (пароль demo1234): demo@payout.ru — компания, buh@ — бухгалтер," "  manager@ — менеджер, ivan@payout.ru — исполнитель; admin@payout.ru / admin1234 — оператор" )
+$( [ $PROD -eq 0 ] && printf '%s\n' "  Демо-доступы (пароль demo1234): demo@samoletpay.ru — компания, buh@ — бухгалтер," "  manager@ — менеджер, ivan@samoletpay.ru — исполнитель; admin@samoletpay.ru / admin1234 — оператор" )
 
-  Логи:        journalctl -u payout -f
-  Перезапуск:  sudo systemctl restart payout
-  Обновление:  sudo bash deploy/update.sh   (из папки новой версии)
+  Логи:        journalctl -u samoletpay -f
+  Перезапуск:  sudo systemctl restart samoletpay
+  Обновление:  cd ~/SamoletPay && git pull && sudo bash deploy/update.sh
   Сброс демо:  sudo bash $APP_DIR/deploy/reset-demo.sh
 ────────────────────────────────────────────────────────────
 EOF

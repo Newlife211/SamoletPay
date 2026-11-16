@@ -20,7 +20,7 @@ fs.mkdirSync(OUT, { recursive: true });
   const apiAs = (p, url, body, method) => p.evaluate(async ([u, b, m]) => { const r = await fetch(u, { method: m || (b ? 'POST' : 'GET'), headers: { 'Content-Type': 'application/json' }, body: b ? JSON.stringify(b) : undefined }); return { status: r.status, json: await r.json().catch(() => ({})) }; }, [url, body, method]);
 
   /* --- роли: менеджер --- */
-  const m = await mk(); await login(m, 'manager@payout.ru'); await m.waitForSelector('.kpis');
+  const m = await mk(); await login(m, 'manager@samoletpay.ru'); await m.waitForSelector('.kpis');
   const nav = await m.textContent('.side');
   if (/Баланс|Интеграции/.test(nav)) errors.push('менеджер видит Баланс/Интеграции');
   await m.goto(BASE + '/app#/payouts'); await m.waitForSelector('.tbl'); await m.click('.topbar >> text=Новая выплата'); await m.waitForSelector('.pay-row');
@@ -30,18 +30,18 @@ fs.mkdirSync(OUT, { recursive: true });
   step('роль «Менеджер»: нет доступа к отправке выплат, балансу и API');
 
   /* --- восстановление пароля --- */
-  const b = await mk(); await b.goto(BASE + '/app#/forgot'); await b.fill('[name=email]', 'buh@payout.ru'); await b.click('#f button');
+  const b = await mk(); await b.goto(BASE + '/app#/forgot'); await b.fill('[name=email]', 'buh@samoletpay.ru'); await b.click('#f button');
   await b.waitForSelector('.demo-hint a'); await b.click('.demo-hint a'); await b.waitForSelector('[name=password]');
   await b.fill('[name=password]', 'NewBuh2026'); await b.click('#f button'); await b.waitForSelector('#f [name=email]');
-  await login(b, 'buh@payout.ru', 'demo1234'); await b.waitForSelector('.toast.err'); // старый пароль больше не подходит
-  await login(b, 'buh@payout.ru', 'NewBuh2026'); await b.waitForSelector('.kpis'); step('сброс пароля по ссылке, старый пароль отклонён');
+  await login(b, 'buh@samoletpay.ru', 'demo1234'); await b.waitForSelector('.toast.err'); // старый пароль больше не подходит
+  await login(b, 'buh@samoletpay.ru', 'NewBuh2026'); await b.waitForSelector('.kpis'); step('сброс пароля по ссылке, старый пароль отклонён');
 
   /* --- 2FA для владельца --- */
-  const o = await mk(); await login(o, 'demo@payout.ru'); await o.waitForSelector('.kpis');
+  const o = await mk(); await login(o, 'demo@samoletpay.ru'); await o.waitForSelector('.kpis');
   await o.goto(BASE + '/app#/security'); await o.click('#s2'); await o.waitForSelector('#s2box .keybox');
   const secret = (await o.textContent('#s2box .keybox')).replace(/\s/g, '');
   await o.fill('#e2 [name=code]', S.totpNow(secret)); await o.click('#e2 button'); await o.waitForSelector('text=Включена'); await shot(o, '71-security-2fa');
-  const o2 = await mk(); await login(o2, 'demo@payout.ru'); await o2.waitForSelector('#tf [name=code]'); await shot(o2, '72-login-2fa');
+  const o2 = await mk(); await login(o2, 'demo@samoletpay.ru'); await o2.waitForSelector('#tf [name=code]'); await shot(o2, '72-login-2fa');
   await o2.fill('#tf [name=code]', '000000'); await o2.click('#tf button'); await o2.waitForSelector('.toast.err');
   await o2.fill('#tf [name=code]', S.totpNow(secret)); await o2.click('#tf button'); await o2.waitForSelector('.kpis'); step('2FA: включение, вход по коду, неверный код отклонён');
 
@@ -80,7 +80,7 @@ fs.mkdirSync(OUT, { recursive: true });
 
   /* --- пополнение через оператора --- */
   const inv = await apiAs(o, '/api/invoices', { amount: 50000 });
-  const a = await mk(); await login(a, 'admin@payout.ru', 'admin1234'); await a.waitForSelector('.kpis'); await shot(a, '80-admin');
+  const a = await mk(); await login(a, 'admin@samoletpay.ru', 'admin1234'); await a.waitForSelector('.kpis'); await shot(a, '80-admin');
   await a.goto(BASE + '/app#/admin/invoices'); await a.waitForSelector(`[data-c="${inv.json.id}"]`); await a.click(`[data-c="${inv.json.id}"]`); await a.waitForSelector('text=Баланс компании пополнен'); step('оператор подтвердил поступление');
   await a.goto(BASE + '/app#/admin/outstaff'); await a.waitForSelector('[data-add]'); await shot(a, '81-admin-outstaff'); await a.click('[data-add]');
   await a.fill('#cf [name=full_name]', 'Кандидат Складов'); await a.fill('#cf [name=inn]', '500100732259'); await a.fill('#cf [name=card]', '2200000000000004'); await a.fill('#cf [name=phone]', '+79991234567');
@@ -94,7 +94,7 @@ fs.mkdirSync(OUT, { recursive: true });
   const call = () => fetch(BASE + '/api/v1/payouts', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Api-Key': key, 'Idempotency-Key': 'order-777' }, body: JSON.stringify({ contractor_id: 2, amount: 1234.56 }) }).then((r) => r.json());
   const p1 = await call(), p2 = await call();
   if (p1.id !== p2.id) errors.push('Idempotency-Key не сработал'); else step(`Open API: повтор с Idempotency-Key вернул ту же выплату #${p1.id}`);
-  const bad = await fetch(BASE + '/api/v1/balance', { headers: { 'X-Api-Key': 'po_live_wrong' } }); if (bad.status !== 401) errors.push('неверный ключ не отклонён');
+  const bad = await fetch(BASE + '/api/v1/balance', { headers: { 'X-Api-Key': 'sp_live_wrong' } }); if (bad.status !== 401) errors.push('неверный ключ не отклонён');
 
   await browser.close();
   console.log(errors.length ? '\nОШИБКИ:\n' + errors.join('\n') : '\nВсе сценарии пройдены без ошибок');

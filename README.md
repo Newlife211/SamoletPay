@@ -1,4 +1,4 @@
-# PayOut
+# SamoletPay
 
 Платформа для компаний, которые работают с самозанятыми, ИП, физлицами и штатными сотрудниками. Что внутри:
 - электронные договоры и акты, кадровый ЭДО (КЭДО);
@@ -23,11 +23,11 @@ npm test           # 20 модульных тестов
 
 | Роль | Email | Пароль |
 |---|---|---|
-| Компания — владелец | demo@payout.ru | demo1234 |
-| Компания — бухгалтер | buh@payout.ru | demo1234 |
-| Компания — менеджер | manager@payout.ru | demo1234 |
-| Исполнитель | ivan@payout.ru | demo1234 |
-| Оператор платформы | admin@payout.ru | admin1234 |
+| Компания — владелец | demo@samoletpay.ru | demo1234 |
+| Компания — бухгалтер | buh@samoletpay.ru | demo1234 |
+| Компания — менеджер | manager@samoletpay.ru | demo1234 |
+| Исполнитель | ivan@samoletpay.ru | demo1234 |
+| Оператор платформы | admin@samoletpay.ru | admin1234 |
 
 Боевой запуск: скопируйте `.env.example` и задайте переменные. Обязательно `DEMO_MODE=0`, `SEED=0`, `COOKIE_SECURE=1`, `APP_URL`, провайдеры SMS и email. Деплой на VPS (Oracle Cloud + Cloudflare Tunnel): [deploy/DEPLOY.md](deploy/DEPLOY.md). Docker: `docker build -t payout . && docker run --env-file .env -p 3000:3000 -v payout:/data payout`.
 
@@ -63,7 +63,7 @@ tests/          — unit.test.js (node:test), e2e.js и e2e2.js (Playwright)
   - **бухгалтер** — выплаты, подпись, баланс, выгрузки, журнал;
   - **менеджер** — готовит документы и черновики выплат, но не отправляет деньги и не подписывает.
 - **API-ключи** хранятся только в виде SHA-256.
-- **Вебхуки** подписываются HMAC-SHA256: заголовки `X-PayOut-Timestamp` и `X-PayOut-Signature`.
+- **Вебхуки** подписываются HMAC-SHA256: заголовки `X-SamoletPay-Timestamp` и `X-SamoletPay-Signature`.
 - **Защита от атак:** CSRF (проверка Origin), CSP, X-Frame-Options, защита от CSV-инъекций в выгрузках, экранирование всех данных в документах.
 - **Журнал действий** всех значимых операций; записи нельзя удалить.
 

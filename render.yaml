@@ -1,8 +1,8 @@
-# Render Blueprint: бесплатный тестовый стенд PayOut (Docker, без карты)
+# Render Blueprint: бесплатный тестовый стенд SamoletPay (Docker, без карты)
 # Render → New → Blueprint → выберите репозиторий с этим файлом.
 services:
   - type: web
-    name: payout
+    name: samoletpay
     runtime: docker
     plan: free
     region: frankfurt

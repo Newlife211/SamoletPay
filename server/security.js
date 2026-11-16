@@ -96,7 +96,7 @@ function consumeUserToken(t, kind) {
 }
 
 /* ---------- API-ключи: хранится только SHA-256 ---------- */
-function newApiKey() { const key = 'po_live_' + token(20); return { key, hash: sha256(key), prefix: key.slice(0, 12), last4: key.slice(-4) }; }
+function newApiKey() { const key = 'sp_live_' + token(20); return { key, hash: sha256(key), prefix: key.slice(0, 12), last4: key.slice(-4) }; }
 
 /* ---------- HMAC подпись вебхуков ---------- */
 function signWebhook(secret, body, ts) { return crypto.createHmac('sha256', secret).update(`${ts}.${body}`).digest('hex'); }

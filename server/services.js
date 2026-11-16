@@ -168,7 +168,7 @@ jobs.register('webhook.deliver', async (pl, job) => {
   const ts = Math.floor(Date.now() / 1000);
   let status;
   try {
-    const r = await fetch(c.webhook_url, { method: 'POST', signal: AbortSignal.timeout(5000), headers: { 'Content-Type': 'application/json', 'X-PayOut-Event': pl.event, 'X-PayOut-Timestamp': String(ts), 'X-PayOut-Signature': 'sha256=' + S.signWebhook(c.webhook_secret || '', body, ts) }, body });
+    const r = await fetch(c.webhook_url, { method: 'POST', signal: AbortSignal.timeout(5000), headers: { 'Content-Type': 'application/json', 'X-SamoletPay-Event': pl.event, 'X-SamoletPay-Timestamp': String(ts), 'X-SamoletPay-Signature': 'sha256=' + S.signWebhook(c.webhook_secret || '', body, ts) }, body });
     status = String(r.status);
     q.run('INSERT INTO webhook_logs (company_id,event,url,status,attempt) VALUES (?,?,?,?,?)', pl.company_id, pl.event, c.webhook_url, status, job.attempts + 1);
     if (r.status >= 300) throw Object.assign(new Error('HTTP ' + r.status), { quiet: true });
@@ -192,11 +192,11 @@ jobs.register('sessions.cleanup', async () => { S.cleanupSessions(); q.run(`DELE
 jobs.register('db.backup', async () => {
   const dir = process.env.BACKUP_DIR || path.join(path.dirname(DB_PATH), 'backups');
   fs.mkdirSync(dir, { recursive: true });
-  const file = path.join(dir, `payout-${new Date().toISOString().slice(0, 10)}.db`);
+  const file = path.join(dir, `samoletpay-${new Date().toISOString().slice(0, 10)}.db`);
   try { fs.unlinkSync(file); } catch {}
   db().exec(`VACUUM INTO '${file.replace(/'/g, "''")}'`);
   const keep = Number(process.env.BACKUP_KEEP || 7);
-  fs.readdirSync(dir).filter((f) => /^payout-.*\.db$/.test(f)).sort().slice(0, -keep).forEach((f) => fs.unlinkSync(path.join(dir, f)));
+  fs.readdirSync(dir).filter((f) => /^samoletpay-.*\.db$/.test(f)).sort().slice(0, -keep).forEach((f) => fs.unlinkSync(path.join(dir, f)));
 });
 function startSchedules() {
   jobs.every('npd.daily', 60 * 60e3);
