@@ -1,0 +1,22 @@
+# Render Blueprint: бесплатный тестовый стенд PayOut (Docker, без карты)
+# Render → New → Blueprint → выберите репозиторий с этим файлом.
+services:
+  - type: web
+    name: payout
+    runtime: docker
+    plan: free
+    region: frankfurt
+    healthCheckPath: /healthz
+    envVars:
+      - key: DEMO_MODE
+        value: "1"
+      - key: SEED
+        value: "1"
+      - key: COOKIE_SECURE
+        value: "1"
+      - key: TRUST_PROXY
+        value: "1"
+      - key: NPD_OFFLINE
+        value: "0"
+      - key: SITE_PASSWORD
+        sync: false   # задаётся в панели Render (можно оставить пустым)

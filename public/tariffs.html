@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Тарифы — PayOut</title><link rel="stylesheet" href="/assets/base.css"><link rel="stylesheet" href="/assets/site.css"></head>
+<body><header id="site-h"></header><main>
+<section class="hero" style="padding-bottom:40px"><div class="container">
+  <span class="eyebrow">Тарифы</span>
+  <h1 class="h-xl" style="max-width:820px">Честные цены, <span class="hl">опубликованные на сайте</span></h1>
+  <p class="lead">Без скрытых комиссий, платы за подключение и звонка менеджеру ради прайса. Комиссия берётся только с проведённых выплат.</p>
+  <div class="plans" id="plans"></div>
+</div></section>
+<section style="padding-top:0"><div class="container">
+  <h2 class="h-l">Калькулятор выплаты</h2>
+  <div class="calc">
+    <div class="card">
+      <label class="f"><span>Выплат в месяц, ₽: <b id="vOut"></b></span><input type="range" id="vol" min="50000" max="10000000" step="50000" value="1000000"></label>
+      <label class="f"><span>Тип исполнителей</span><select class="input" id="ctype"><option value="npd">Самозанятые (НПД 6% удерживаем за них)</option><option value="fl">Физлица по ГПХ (НДФЛ 13% + взносы)</option><option value="ip">ИП (без удержаний)</option></select></label>
+      <label class="f"><span>Тариф</span><select class="input" id="plan"></select></label>
+      <p class="small muted">Посчитаем рекомендуемый тариф: с ростом объёма выгоднее переходить на тариф с меньшей комиссией.</p>
+    </div>
+    <div class="calc-out" id="out"></div>
+  </div>
+</div></section>
+</main><footer id="site-f"></footer><script src="/assets/site.js"></script>
+<script>
+const feats = {
+  start: ['До 50 исполнителей', 'ЭДО: договоры, акты, задания', 'Проверка статуса НПД', 'Выплаты на карты', 'Чеки ФНС автоматически', 'Поддержка в чате 24/7'],
+  business: ['До 1 000 исполнителей', 'Всё из «Старта»', 'Реестры, импорт CSV/Excel', 'Open API, вебхуки, выгрузка в 1С', 'Сплит-платежи', 'Роли команды и уведомления бухгалтерии'],
+  enterprise: ['Без ограничений', 'Всё из «Бизнеса»', 'White Label и свой домен', 'Подпись через Госключ', 'Персональный менеджер и SLA', 'Юридическое сопровождение'],
+};
+let PL;
+const fmt = (n) => Math.round(n).toLocaleString('ru-RU') + ' ₽';
+fetch('/api/public/plans').then((r) => r.json()).then(({ plans }) => {
+  PL = plans;
+  document.getElementById('plans').innerHTML = Object.entries(plans).map(([k, p]) => `<div class="plan ${k === 'business' ? 'hot' : ''}">
+    <h3>${p.name}</h3><p class="muted" style="margin:0">${p.desc}</p>
+    <div class="price">${p.monthly ? p.monthly.toLocaleString('ru-RU') + ' ₽' : '0 ₽'}<small> / мес</small></div>
+    <div class="fee">+ ${String(p.fee).replace('.', ',')}% от суммы выплаты</div>
+    <ul>${feats[k].map((f) => `<li>${f}</li>`).join('')}</ul>
+    <a class="btn ${k === 'business' ? 'btn-primary' : 'btn-ghost'}" href="/app#/register">Выбрать</a></div>`).join('');
+  document.getElementById('plan').innerHTML = Object.entries(plans).map(([k, p]) => `<option value="${k}" ${k === 'business' ? 'selected' : ''}>${p.name} — ${p.fee}%</option>`).join('');
+  calc();
+});
+function calc() {
+  const v = +vol.value, t = ctype.value, p = PL[plan.value];
+  document.getElementById('vOut').textContent = fmt(v);
+  const fee = v * p.fee / 100 + p.monthly;
+  const tax = t === 'npd' ? v * 0.06 : t === 'fl' ? v * 0.13 : 0;
+  const contrib = t === 'fl' ? v * 0.30 : 0;
+  const best = Object.entries(PL).map(([k, x]) => [k, v * x.fee / 100 + x.monthly]).sort((a, b) => a[1] - b[1])[0];
+  document.getElementById('out').innerHTML = `
+    <div class="r"><span>Сумма выплат</span><b>${fmt(v)}</b></div>
+    <div class="r"><span>Комиссия и абонплата</span><b>${fmt(fee)}</b></div>
+    <div class="r"><span>${t === 'npd' ? 'НПД 6% (из суммы исполнителя)' : t === 'fl' ? 'НДФЛ 13% (из суммы исполнителя)' : 'Удержания'}</span><b>${fmt(tax)}</b></div>
+    ${t === 'fl' ? `<div class="r"><span>Страховые взносы ~30% (сверху)</span><b>${fmt(contrib)}</b></div>` : ''}
+    <div class="r"><span>Исполнители получат</span><b>${fmt(v - tax)}</b></div>
+    <div class="tot">${fmt(v + fee + contrib)}</div><div style="color:#9FB0C0">ваши расходы в месяц</div>
+    ${best[0] !== plan.value ? `<p style="margin:16px 0 0;color:var(--lime)">💡 На тарифе «${PL[best[0]].name}» выйдет ${fmt(best[1])} вместо ${fmt(fee)}</p>` : ''}
+    ${t === 'fl' ? `<p style="margin:12px 0 0;color:#C2CDD8">С самозанятыми вы бы сэкономили ${fmt(contrib)} на взносах.</p>` : ''}`;
+}
+['vol', 'ctype', 'plan'].forEach((id) => document.getElementById(id).addEventListener('input', calc));
+</script></body></html>

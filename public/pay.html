@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Оплата — PayOut</title><link rel="stylesheet" href="/assets/base.css">
+<style>body{display:flex;min-height:100vh;align-items:center;justify-content:center;padding:20px}.box{width:100%;max-width:420px}.sum{font-size:40px;font-weight:800;letter-spacing:-.03em;margin:4px 0 20px}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}</style></head>
+<body><div class="box">
+  <div class="card" id="root"><p class="muted">Загрузка…</p></div>
+  <p class="small muted" style="text-align:center;margin-top:14px">Платёж защищён · <a class="logo" style="font-size:13px" href="/"><i style="width:18px;height:18px;border-radius:5px"></i>PayOut</a></p>
+</div>
+<script>
+const token = location.pathname.split('/').pop(); const root = document.getElementById('root');
+const fmt = (n) => Number(n).toLocaleString('ru-RU', { minimumFractionDigits: 2 }) + ' ₽';
+fetch('/api/public/split/' + token).then(async (r) => { const j = await r.json(); if (!r.ok) throw new Error(j.error); return j; }).then((s) => {
+  if (s.status !== 'pending') { root.innerHTML = `<h3>Счёт оплачен ✓</h3><p class="muted">${s.company} · ${s.title}</p>`; return; }
+  root.innerHTML = `<div class="muted small">${s.company}</div><h3 style="margin:4px 0 0">${s.title}</h3><div class="sum">${fmt(s.amount)}</div>
+  <form id="f"><label class="f"><span>Имя плательщика</span><input class="input" name="payer_name" required></label>
+  <label class="f"><span>Номер карты</span><input class="input mono" name="card" inputmode="numeric" placeholder="2200 0000 0000 0004" required></label>
+  <div class="two"><label class="f"><span>Срок</span><input class="input mono" placeholder="12/29" required></label><label class="f"><span>CVC</span><input class="input mono" maxlength="3" placeholder="•••" required></label></div>
+  <button class="btn btn-primary btn-lg" style="width:100%">Оплатить ${fmt(s.amount)}</button>
+  <p class="small muted" style="margin:10px 0 0">Демо-эквайринг: подойдёт любая карта, проходящая проверку Луна, например 2200 0000 0000 0004.</p></form>`;
+  document.getElementById('f').onsubmit = async (e) => {
+    e.preventDefault(); const d = Object.fromEntries(new FormData(e.target));
+    const r = await fetch(`/api/public/split/${token}/pay`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) });
+    const j = await r.json(); if (!r.ok) return alert(j.error);
+    root.innerHTML = `<h3>Оплата прошла ✓</h3><p class="muted">Спасибо! Чек отправлен. Деньги распределены между исполнителями.</p>`;
+  };
+}).catch((e) => root.innerHTML = `<h3>Платёж не найден</h3><p class="muted">${e.message}</p>`);
+</script></body></html>

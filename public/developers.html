@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Open API — PayOut</title><link rel="stylesheet" href="/assets/base.css"><link rel="stylesheet" href="/assets/site.css"></head>
+<body><header id="site-h"></header><main>
+<section class="hero" style="padding-bottom:20px"><div class="container">
+  <span class="eyebrow">Для разработчиков</span>
+  <h1 class="h-xl">Open API <span class="hl">без NDA</span></h1>
+  <p class="lead">REST + JSON. Ключ создаётся в кабинете в разделе «Интеграции». Все суммы указываются в рублях.</p>
+</div></section>
+<section style="padding-top:10px"><div class="container prose">
+  <h2>Аутентификация</h2>
+  <p>Передавайте ключ в заголовке <span class="mono">X-Api-Key</span>.</p>
+  <div class="code">curl https://payout.example/api/v1/balance -H "X-Api-Key: po_live_…"</div>
+
+  <div class="ep"><span class="m">GET</span>/api/v1/balance</div><p>Текущий баланс номинального счёта.</p>
+  <div class="ep"><span class="m">GET</span>/api/v1/contractors</div><p>Список исполнителей и статус НПД.</p>
+  <div class="ep"><span class="m post">POST</span>/api/v1/contractors</div><p>Добавить исполнителя. Статус НПД проверяется сразу.</p>
+  <div class="code">{
+  <span class="k">"type"</span>: "npd",           // npd | ip | fl | eaeu
+  <span class="k">"full_name"</span>: "Иван Петров",
+  <span class="k">"inn"</span>: "500100732259",
+  <span class="k">"phone"</span>: "+79001234567",
+  <span class="k">"card"</span>: "2200000000000004"
+}</div>
+  <div class="ep"><span class="m">GET</span>/api/v1/payouts?status=paid&amp;since_id=100</div><p>Последние 500 выплат со статусами и номерами чеков. <span class="mono">GET /api/v1/payouts/:id</span> — одна выплата.</p>
+  <div class="ep"><span class="m post">POST</span>/api/v1/payouts</div><p>Создать и сразу отправить выплату. Перед отправкой выполняются риск-проверки. Передавайте заголовок <span class="mono">Idempotency-Key</span>: повторный запрос с тем же ключом вернёт уже созданную выплату, а не создаст вторую.</p>
+  <div class="code">{ <span class="k">"contractor_id"</span>: 42, <span class="k">"amount"</span>: 15000, <span class="k">"purpose"</span>: "Оплата по акту А-2026-0012" }
+
+→ { "id": 381, "status": "processing", "commission": 285, "tax": 900, "net": 14100 }</div>
+
+  <h2>Вебхуки</h2>
+  <p>Укажите URL в кабинете. Мы отправляем POST с JSON о событиях <span class="mono">payout.paid</span>, <span class="mono">payout.failed</span> и <span class="mono">document.signed</span>. При ошибке — до 6 повторов с нарастающей паузой.</p>
+  <p>Каждый запрос подписан: заголовки <span class="mono">X-PayOut-Timestamp</span> и <span class="mono">X-PayOut-Signature</span>. Проверяйте подпись секретом из кабинета:</p>
+  <div class="code">expected = "sha256=" + HMAC_SHA256(secret, timestamp + "." + raw_body).hex()
+<span class="k">if</span> not compare_digest(expected, request.headers["X-PayOut-Signature"]): reject()</div>
+  <div class="code">{ "event": "payout.paid", "data": { "id": 381, "amount": 15000, "contractor_id": 42, "receipt": "20a1b2c3d4e5" }, "ts": "2026-11-16T10:00:00Z" }</div>
+  <h2>Ошибки</h2>
+  <p>Ответ с кодом 4xx содержит поле <span class="mono">error</span> с понятным текстом на русском. Например, 402 означает «Недостаточно средств», 422 — что выплата заблокирована риск-проверкой, 429 — превышен лимит 600 запросов в минуту.</p>
+  <h2>Проверка подлинности документов</h2>
+  <p><span class="mono">GET /api/public/verify/:sha256</span> — публичная проверка подписанного документа по контрольной сумме (также страница <span class="mono">/verify/:sha256</span>).</p>
+</div></section>
+</main><footer id="site-f"></footer><script src="/assets/site.js"></script></body></html>

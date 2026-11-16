@@ -1,0 +1,16 @@
+{
+  "name": "payout",
+  "version": "1.1.0",
+  "description": "PayOut — платформа для работы с самозанятыми: ЭДО и КЭДО, массовые выплаты, чеки НПД, биржа заданий, сплит-платежи, Open API",
+  "main": "server/index.js",
+  "engines": { "node": ">=22.5" },
+  "scripts": {
+    "start": "node --no-warnings server/index.js",
+    "dev": "node --no-warnings --watch server/index.js",
+    "seed": "node --no-warnings server/seed.js",
+    "test": "node --no-warnings --test tests/unit.test.js",
+    "test:e2e": "node tests/e2e.js shots && node tests/e2e2.js shots"
+  },
+  "license": "UNLICENSED",
+  "private": true
+}
