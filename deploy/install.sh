@@ -151,15 +151,7 @@ else
     curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' > /etc/apt/sources.list.d/caddy-stable.list
     apt-get update -y && apt-get install -y caddy
   fi
-  cat > /etc/caddy/Caddyfile <<EOF
-{
-  email $EMAIL
-}
-$DOMAIN {
-  encode gzip
-  reverse_proxy 127.0.0.1:3000
-}
-EOF
+  printf '{\n\temail %s\n}\n\n%s {\n\tencode gzip\n\treverse_proxy 127.0.0.1:3000\n}\n' "$EMAIL" "$DOMAIN" > /etc/caddy/Caddyfile
   caddy validate --config /etc/caddy/Caddyfile >/dev/null
   systemctl enable caddy >/dev/null; systemctl reload caddy || systemctl restart caddy
 
@@ -191,7 +183,7 @@ cat <<EOF
 ────────────────────────────────────────────────────────────
   Готово: https://$DOMAIN
 $( [ "$MODE" = tunnel ] && echo "  В Cloudflare у туннеля должен быть Public hostname: $DOMAIN → http://localhost:3000" )
-$( [ "$MODE" = caddy ] && echo "  Откройте порты 80 и 443 в Security List Oracle — сертификат выпустится за минуту" )
+$( [ "$MODE" = caddy ] && echo "  HTTPS-сертификат выпустится за 1–2 минуты. Если у облака есть свой файрвол" && echo "  (Oracle Security List, GCP firewall), в нём должны быть открыты порты 80 и 443" )
 $( [ -n "$SITE_PASS" ] && echo "  Вход на стенд: логин любой (например tester), пароль $SITE_PASS" )
 $( [ $PROD -eq 0 ] && printf '%s\n' "  Демо-доступы (пароль demo1234): demo@samoletpay.ru — компания, buh@ — бухгалтер," "  manager@ — менеджер, ivan@samoletpay.ru — исполнитель; admin@samoletpay.ru / admin1234 — оператор" )
 
