@@ -29,7 +29,7 @@ npm test           # 20 модульных тестов
 | Исполнитель | ivan@samoletpay.ru | demo1234 |
 | Оператор платформы | admin@samoletpay.ru | admin1234 |
 
-Боевой запуск: скопируйте `.env.example` и задайте переменные. Обязательно `DEMO_MODE=0`, `SEED=0`, `COOKIE_SECURE=1`, `APP_URL`, провайдеры SMS и email. Деплой на VPS (Oracle Cloud + Cloudflare Tunnel): [deploy/DEPLOY.md](deploy/DEPLOY.md). Docker: `docker build -t payout . && docker run --env-file .env -p 3000:3000 -v payout:/data payout`.
+Боевой запуск: скопируйте `.env.example` и задайте переменные. Обязательно `DEMO_MODE=0`, `SEED=0`, `COOKIE_SECURE=1`, `APP_URL`, провайдеры SMS и email. Деплой: на платный VPS — [deploy/DEPLOY-VPS.md](deploy/DEPLOY-VPS.md), Oracle + Cloudflare Tunnel — [deploy/DEPLOY.md](deploy/DEPLOY.md), Google Cloud — [deploy/DEPLOY-GCP.md](deploy/DEPLOY-GCP.md). Docker: `docker build -t payout . && docker run --env-file .env -p 3000:3000 -v payout:/data payout`.
 
 ## Архитектура
 
